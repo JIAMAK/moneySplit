@@ -1,0 +1,20 @@
+#RedirectMatch 301 /data /tech.html
+RewriteEngine on
+Options All -Indexes
+<FilesMatch "\.(html|htm|js|css)$">
+  FileETag None
+  <IfModule mod_headers.c>
+    Header unset ETag
+    ExpiresActive On
+    ExpiresDefault A1
+    Header append Cache-Control must-revalidate    
+    Header set Pragma "no-cache"
+    Header set Expires "Wed, 12 Jan 1980 05:00:00 GMT"
+  </IfModule>
+  <IfModule mod_expires.c>
+    ExpiresActive On ExpiresDefault "access plus 1 days"
+  </IfModule>
+</FilesMatch>
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.html [L]

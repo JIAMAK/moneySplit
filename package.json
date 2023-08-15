@@ -1,0 +1,25 @@
+{
+  "name": "money_split",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "lodash.debounce": "^4.0.8",
+    "pinia": "^2.1.4",
+    "uuid": "^9.0.0",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
+  },
+  "devDependencies": {
+    "@vicons/fluent": "^0.12.0",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "naive-ui": "^2.34.4",
+    "vfonts": "0.0.3",
+    "vite": "^4.4.6"
+  }
+}
