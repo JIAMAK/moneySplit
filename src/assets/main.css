@@ -1,0 +1,10 @@
+.content-style {
+    min-height: 100vh;
+    background: rgb(255, 255, 255);
+    background: linear-gradient(45deg,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(239, 251, 219, 1) 100%),
+        linear-gradient(180deg,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(239, 251, 219, 1) 100%);
+}

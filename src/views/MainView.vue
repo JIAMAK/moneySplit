@@ -1,6 +1,8 @@
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref, reactive } from "vue";
 import { v4 as uuidv4 } from "uuid";
+import { useRoute, useRouter } from "vue-router";
+
 import {
   NLayout,
   NLayoutHeader,
@@ -23,7 +25,8 @@ import {
 } from "naive-ui";
 import { Add16Filled as AddIcon } from "@vicons/fluent";
 
-const startID = ref(0);
+const startID = ref(1);
+const router = useRouter();
 const formData = reactive({
   id: null,
   eventName: null,
@@ -31,9 +34,10 @@ const formData = reactive({
   creatorEmail: null,
   members: [
     {
-      id: 0,
+      id: 1,
       label: "Участник 1",
       name: null,
+      expense: [],
     },
   ],
 });
@@ -49,28 +53,48 @@ const rules = {
     required: true,
     message: "Обязательное поле",
   },
-  members: {},
+  creatorEmail: {
+    required: false,
+    validator(rule, value) {
+      if (!value) return true;
+      if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
+        return new Error("Введен не корректный email");
+      }
+      return true;
+    },
+    trigger: ["change"],
+  },
 };
 
 const addMember = () => {
   startID.value++;
   formData.members.push({
-    id: startID,
+    id: startID.value,
     label: `Участник ${startID.value + 1}`,
     name: null,
+    expense: [],
   });
 };
 
-const removeMember = () => {
+const removeMember = (id) => {
   startID.value--;
-  formData.members.pop();
+  formData.members = formData.members
+    .filter((itm) => itm.id !== id)
+    .map((itm, idx) => ({
+      id: idx,
+      label: `Участник ${idx + 1}`,
+      name: itm.name,
+      expense: [],
+    }));
 };
 
 const createEvent = () => {
   formRef.value?.validate((errors) => {
     if (!errors) {
-      formData.id = uuidv4();
-      console.log(formData);
+      const eventID = uuidv4();
+      formData.id = eventID;
+      localStorage.setItem("_eventData", JSON.stringify(formData));
+      router.push(`/event/${eventID}`);
     } else {
       console.log(errors);
     }
@@ -101,18 +125,14 @@ const createEvent = () => {
                   placeholder="Ваше имя"
                 ></n-input>
               </n-form-item>
-              <n-form-item
-                :show-feedback="false"
-                label="Email"
-                path="creatorEmail"
-              >
+              <n-form-item label="Email" path="creatorEmail">
                 <n-input
                   v-model:value="formData.creatorEmail"
                   placeholder="Веедите Email (рекомендуется)"
                 ></n-input>
               </n-form-item>
               <n-divider
-                style="margin-top: 18px; margin-bottom: 5px"
+                style="margin-top: 2px; margin-bottom: 5px"
               ></n-divider>
               <n-form-item
                 v-for="(itm, idx) in formData.members"
@@ -129,9 +149,9 @@ const createEvent = () => {
                 <n-input-group>
                   <n-input v-model:value="itm.name" placeholder="Имя"></n-input>
                   <n-button
-                    v-if="idx !== 0 && formData.members.length === idx + 1"
-                    type="primary"
-                    @click="removeMember"
+                    v-if="idx !== 0"
+                    type="error"
+                    @click="removeMember(itm.id)"
                   >
                     -
                   </n-button>
@@ -154,6 +174,9 @@ const createEvent = () => {
             </n-form>
           </n-card>
         </n-col>
+      </n-row>
+      <n-row>
+        <pre>{{ JSON.stringify(formData, null, 2) }}</pre>
       </n-row>
     </n-layout-content>
   </n-layout>
