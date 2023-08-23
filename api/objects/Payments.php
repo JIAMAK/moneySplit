@@ -118,7 +118,7 @@ class Payments
                 $debtors_count = count($debtors);
                 foreach ($debtors as $key => $d) {
                     if ($value['member_id'] == $d) continue;
-                    $price = round($value['price'] / $debtors_count, 1);
+                    $price = $value['price'] / $debtors_count;
                     if (array_key_exists($d, $payback) && array_key_exists($value['member_id'], $payback[$d])) {
                         $calc = $payback[$d][$value['member_id']] - $price;
                         if ($calc < 0) {
@@ -143,7 +143,7 @@ class Payments
                     array_push($payback_transaction, [
                         "receiver_name" => $this->members->{$key_p},
                         "sender_name" => $this->members->{$key},
-                        "price" => $p,
+                        "price" => round($p, 1),
                     ]);
                 }
             }

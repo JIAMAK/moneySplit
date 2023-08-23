@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import MainView from "@/views/MainView.vue";
+import AddEventView from "@/views/AddEventView.vue";
 import EventView from "@/views/EventView.vue";
 
 const router = createRouter({
@@ -16,8 +17,13 @@ const router = createRouter({
     },
     {
       path: "/",
-      name: "home",
+      name: "mainPage",
       component: MainView,
+    },
+    {
+      path: "/add",
+      name: "addEvent",
+      component: AddEventView,
     },
     {
       path: "/event/:id",
