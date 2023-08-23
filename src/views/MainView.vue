@@ -1,7 +1,10 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import { v4 as uuidv4 } from "uuid";
 import { useRoute, useRouter } from "vue-router";
+import { useEvent } from "@/store/event";
+import { useUserMessage } from "@/store/message";
+import { storeToRefs } from "pinia";
 
 import {
   NLayout,
@@ -12,8 +15,6 @@ import {
   NSpace,
   NGrid,
   NGi,
-  NRow,
-  NCol,
   NForm,
   NFormItem,
   NInput,
@@ -22,11 +23,17 @@ import {
   NH4,
   NIcon,
   NInputGroup,
+  useMessage,
 } from "naive-ui";
 import { Add16Filled as AddIcon } from "@vicons/fluent";
 
+const message = useMessage();
+const userMessage = useUserMessage();
+const { isVisible } = storeToRefs(userMessage);
+
 const startID = ref(1);
 const router = useRouter();
+const l_save = ref(false);
 const formData = reactive({
   id: null,
   eventName: null,
@@ -34,10 +41,9 @@ const formData = reactive({
   creatorEmail: null,
   members: [
     {
-      id: 1,
+      id: uuidv4(),
       label: "Участник 1",
       name: null,
-      expense: [],
     },
   ],
 });
@@ -66,13 +72,23 @@ const rules = {
   },
 };
 
+watch(isVisible, () => {
+  if (isVisible.value === true) {
+    const messageInfo = userMessage.message;
+    if (messageInfo.type === "error") {
+      message.error(messageInfo.content);
+    } else if (messageInfo.type == "success") {
+      message.success(messageInfo.content);
+    }
+  }
+});
+
 const addMember = () => {
   startID.value++;
   formData.members.push({
-    id: startID.value,
-    label: `Участник ${startID.value + 1}`,
+    id: uuidv4(),
+    label: `Участник ${startID.value}`,
     name: null,
-    expense: [],
   });
 };
 
@@ -81,7 +97,7 @@ const removeMember = (id) => {
   formData.members = formData.members
     .filter((itm) => itm.id !== id)
     .map((itm, idx) => ({
-      id: idx,
+      id: String(idx),
       label: `Участник ${idx + 1}`,
       name: itm.name,
       expense: [],
@@ -91,10 +107,20 @@ const removeMember = (id) => {
 const createEvent = () => {
   formRef.value?.validate((errors) => {
     if (!errors) {
+      l_save.value = true;
       const eventID = uuidv4();
       formData.id = eventID;
-      localStorage.setItem("_eventData", JSON.stringify(formData));
-      router.push(`/event/${eventID}`);
+      const event = useEvent();
+      event
+        .addEvent(formData)
+        .then(() => {
+          l_save.value = false;
+          localStorage.setItem("_eventData", JSON.stringify(formData));
+          router.push(`/event/${eventID}`);
+        })
+        .catch(() => {
+          l_save.value = false;
+        });
     } else {
       console.log(errors);
     }
@@ -105,8 +131,8 @@ const createEvent = () => {
   <n-layout>
     <!-- <n-layout-header> HEADER </n-layout-header> -->
     <n-layout-content class="content-style" content-style="padding: 24px;">
-      <n-row justify-content="center">
-        <n-col :span="6">
+      <n-grid item-responsive>
+        <n-gi offset="0 400:0 600:0 800:9" span="24 400:24 600:24 800:6">
           <n-card title="Создать событие">
             <n-form ref="formRef" :model="formData" :rules="rules">
               <n-form-item label="Название" path="eventName">
@@ -169,15 +195,18 @@ const createEvent = () => {
                 style="margin-top: 18px; margin-bottom: 18px"
               ></n-divider>
               <n-space justify="end">
-                <n-button type="info" @click="createEvent">Создать</n-button>
+                <n-button
+                  type="info"
+                  :loading="l_save"
+                  :disabled="l_save"
+                  @click="createEvent"
+                  >Создать</n-button
+                >
               </n-space>
             </n-form>
           </n-card>
-        </n-col>
-      </n-row>
-      <n-row>
-        <pre>{{ JSON.stringify(formData, null, 2) }}</pre>
-      </n-row>
+        </n-gi>
+      </n-grid>
     </n-layout-content>
   </n-layout>
 </template>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useUserMessage } from "@/stores/message";
+import { useUserMessage } from "@/store/message";
 
 const baseDomain = import.meta.env.VITE_DEFAULT_API_URL;
 
